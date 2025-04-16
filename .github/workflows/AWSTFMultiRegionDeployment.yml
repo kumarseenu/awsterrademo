@@ -1,0 +1,44 @@
+name: "AWSMultiRegionDeployment"
+on:
+  workflow_dispatch:
+
+jobs:
+  Plan_Dev:
+    if: github.ref == 'refs/heads/develop'
+    uses: RekhuGopal/awsterraformiac/.github/workflows/aws_tf_plan.yml@develop
+    with:
+      path: AWS-Multi-Region-Deployment
+      tf_vars_file: dev.tfvars
+      gh_environment: dev
+    secrets:
+      oidcrolearn: ${{ secrets.RoleARN }}
+
+  Deploy_Dev:
+    needs: Plan_Dev
+    uses: RekhuGopal/awsterraformiac/.github/workflows/aws_tf_appy.yml@develop
+    with:
+      path: AWS-Multi-Region-Deployment
+      tf_vars_file: dev.tfvars
+      gh_environment: dev
+    secrets:
+      oidcrolearn: ${{ secrets.RoleARN }}
+
+  Plan_uat:
+    if: github.ref == 'refs/heads/release'
+    uses: RekhuGopal/awsterraformiac/.github/workflows/aws_tf_plan.yml@release
+    with:
+        path: AWS-Multi-Region-Deployment
+        tf_vars_file: uat.tfvars
+        gh_environment: uat
+    secrets:
+        oidcrolearn: ${{ secrets.RoleARN }}
+
+  Deploy_uat:
+    needs: Plan_uat
+    uses: RekhuGopal/awsterraformiac/.github/workflows/aws_tf_appy.yml@release
+    with:
+        path: AWS-Multi-Region-Deployment
+        tf_vars_file: uat.tfvars
+        gh_environment: uat
+    secrets:
+        oidcrolearn: ${{ secrets.RoleARN }}
