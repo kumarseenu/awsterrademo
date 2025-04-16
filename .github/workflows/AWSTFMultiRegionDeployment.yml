@@ -19,12 +19,13 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3.1.0
-
-      - name: Configure AWS Credentials for Dev
-        uses: aws-actions/configure-aws-credentials@v2
+        
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: arn:aws:iam::357171621133:role/github-oidc-role
-          aws-region: us-east-1
+          role-session-name: odicrole
+          aws-region: eu-west-2
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
