@@ -1,7 +1,9 @@
 name: "AWSMultiRegionDeployment"
 on:
   workflow_dispatch:
-
+permissions:
+    id-token: write
+    contents: read
 jobs:
   Plan_Dev:
     if: github.ref == 'refs/heads/develop'

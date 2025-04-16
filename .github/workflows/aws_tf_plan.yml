@@ -26,8 +26,8 @@ on:
         description: 'OiDC AWS Role ARN'
         required: true
 permissions:
-      id-token: write
-      contents: read
+    id-token: write
+    contents: read
 jobs:
   build-plan:
     runs-on: ubuntu-latest
