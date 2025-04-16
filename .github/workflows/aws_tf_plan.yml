@@ -39,11 +39,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3.1.0
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::357171621133:role/github-oidc-role
-          aws-region: us-east-1
+           role-to-assume: arn:aws:iam::357171621133:role/github-oidc-role
+           role-session-name: oidcrolesession
+           aws-region: us-east-1
         
       - name: Change file name
         run: | 
