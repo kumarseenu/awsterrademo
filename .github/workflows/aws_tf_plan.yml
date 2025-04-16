@@ -44,7 +44,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ secrets.oidcrolearn }}
+          role-to-assume: arn:aws:iam::357171621133:role/github-oidc-role
           aws-region: us-east-1
         
       - name: Change file name
