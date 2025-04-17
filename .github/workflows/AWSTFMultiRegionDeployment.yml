@@ -1,44 +1,157 @@
-name: "AWSMultiRegionDeployment"
+name: AWSMultiEnvTerraformPipeline
+
 on:
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
-  Plan_Dev:
+  terraform_plan_dev:
     if: github.ref == 'refs/heads/develop'
-    uses: RekhuGopal/awsterraformiac/.github/workflows/aws_tf_plan.yml@develop
-    with:
-      path: AWS-Multi-Region-Deployment
-      tf_vars_file: dev.tfvars
-      gh_environment: dev
-    secrets:
-      oidcrolearn: ${{ secrets.RoleARN }}
+    runs-on: ubuntu-latest
+    environment: dev
+    defaults:
+      run:
+        shell: bash
+        working-directory: AWS-Multi-Region-Deployment
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3.1.0
 
-  Deploy_Dev:
-    needs: Plan_Dev
-    uses: RekhuGopal/awsterraformiac/.github/workflows/aws_tf_appy.yml@develop
-    with:
-      path: AWS-Multi-Region-Deployment
-      tf_vars_file: dev.tfvars
-      gh_environment: dev
-    secrets:
-      oidcrolearn: ${{ secrets.RoleARN }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.RoleARN }}
+          aws-region: us-east-1 
 
-  Plan_uat:
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6.6
+
+      - name: Move tfvars to auto.tfvars
+        run: mv dev.tfvars dev.auto.tfvars
+
+      - name: Terraform Init (Dev)
+        run: terraform init
+
+      - name: Terraform Validate (Dev)
+        run: terraform validate
+
+      - name: Terraform Plan (Dev)
+        run: terraform plan
+
+  terraform_apply_dev:
+    if: github.ref == 'refs/heads/develop'
+    needs: terraform_plan_dev
+    runs-on: ubuntu-latest
+    environment: dev
+    defaults:
+      run:
+        shell: bash
+        working-directory: AWS-Multi-Region-Deployment
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3.1.0
+
+      - name: Configure AWS Credentials for Dev
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.RoleARN }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6.6
+
+      - name: Move tfvars to auto.tfvars
+        run: mv dev.tfvars dev.auto.tfvars
+  
+      - name: Terraform Init (Dev)
+        run: terraform init
+  
+      - name: Terraform Validate (Dev)
+        run: terraform validate
+  
+      - name: Terraform Plan (Dev)
+        run: terraform plan
+
+      - name: Terraform Apply (Dev)
+        run: terraform apply -auto-approve
+
+  terraform_plan_uat:
     if: github.ref == 'refs/heads/release'
-    uses: RekhuGopal/awsterraformiac/.github/workflows/aws_tf_plan.yml@release
-    with:
-        path: AWS-Multi-Region-Deployment
-        tf_vars_file: uat.tfvars
-        gh_environment: uat
-    secrets:
-        oidcrolearn: ${{ secrets.RoleARN }}
+    runs-on: ubuntu-latest
+    environment: uat
+    defaults:
+      run:
+        shell: bash
+        working-directory: AWS-Multi-Region-Deployment
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3.1.0
 
-  Deploy_uat:
-    needs: Plan_uat
-    uses: RekhuGopal/awsterraformiac/.github/workflows/aws_tf_appy.yml@release
-    with:
-        path: AWS-Multi-Region-Deployment
-        tf_vars_file: uat.tfvars
-        gh_environment: uat
-    secrets:
-        oidcrolearn: ${{ secrets.RoleARN }}
+      - name: Configure AWS Credentials for UAT
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.RoleARN }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6.6
+
+      - name: Move tfvars to auto.tfvars
+        run: mv uat.tfvars uat.auto.tfvars
+
+      - name: Terraform Init (UAT)
+        run: terraform init
+
+      - name: Terraform Validate (UAT)
+        run: terraform validate
+
+      - name: Terraform Plan (UAT)
+        run: terraform plan
+
+  terraform_apply_uat:
+    if: github.ref == 'refs/heads/release'
+    needs: terraform_plan_uat
+    runs-on: ubuntu-latest
+    environment: uat
+    defaults:
+      run:
+        shell: bash
+        working-directory: AWS-Multi-Region-Deployment
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3.1.0
+
+      - name: Configure AWS Credentials for UAT
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.RoleARN }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6.6
+
+      - name: Move tfvars to auto.tfvars
+        run: mv uat.tfvars uat.auto.tfvars
+  
+      - name: Terraform Init (UAT)
+        run: terraform init
+  
+      - name: Terraform Validate (UAT)
+        run: terraform validate
+  
+      - name: Terraform Plan (UAT)
+        run: terraform plan
+
+      - name: Terraform Apply (UAT)
+        run: terraform apply -auto-approve
