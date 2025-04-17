@@ -23,10 +23,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::357171621133:role/github-oidc-role
-          role-session-name: odicrole
-          aws-region: eu-west-2
-          audience: sts.amazonaws.com
+          role-to-assume: ${{ secrets.RoleARN }}
+          aws-region: ${{ env.REGION }} 
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -61,13 +59,25 @@ jobs:
       - name: Configure AWS Credentials for Dev
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::357171621133:role/github-oidc-role
-          aws-region: us-east-1
+          role-to-assume: ${{ secrets.RoleARN }}
+          aws-region: ${{ env.REGION }} 
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.6.6
+
+      - name: Move tfvars to auto.tfvars
+        run: mv dev.tfvars dev.auto.tfvars
+  
+      - name: Terraform Init (Dev)
+        run: terraform init
+  
+      - name: Terraform Validate (Dev)
+        run: terraform validate
+  
+      - name: Terraform Plan (Dev)
+        run: terraform plan
 
       - name: Terraform Apply (Dev)
         run: terraform apply -auto-approve
@@ -87,8 +97,8 @@ jobs:
       - name: Configure AWS Credentials for UAT
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::357171621133:role/github-oidc-role
-          aws-region: us-east-1
+          role-to-assume: ${{ secrets.RoleARN }}
+          aws-region: ${{ env.REGION }} 
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -123,13 +133,25 @@ jobs:
       - name: Configure AWS Credentials for UAT
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::357171621133:role/github-oidc-role
-          aws-region: us-east-1
+          role-to-assume: ${{ secrets.RoleARN }}
+          aws-region: ${{ env.REGION }} 
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.6.6
+
+      - name: Move tfvars to auto.tfvars
+        run: mv uat.tfvars uat.auto.tfvars
+  
+      - name: Terraform Init (UAT)
+        run: terraform init
+  
+      - name: Terraform Validate (UAT)
+        run: terraform validate
+  
+      - name: Terraform Plan (UAT)
+        run: terraform plan
 
       - name: Terraform Apply (UAT)
         run: terraform apply -auto-approve
